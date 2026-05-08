@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinuxDash - System Monitoring</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <h1>LinuxDash</h1>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot online"></span>
+                <span class="status-text" id="connection-status">Connected</span>
+            </div>
+        </header>
+
+        <main class="dashboard-grid">
+            <!-- System Metrics -->
+            <section class="card metrics-card">
+                <h2>System Resources</h2>
+                <div class="metrics-grid">
+                    
+                    <div class="metric-item">
+                        <div class="metric-header">
+                            <h3>CPU Usage</h3>
+                            <span class="metric-value" id="cpu-val">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="cpu-bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="metric-item">
+                        <div class="metric-header">
+                            <h3>Memory Usage</h3>
+                            <span class="metric-value" id="mem-val">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill mem-fill" id="mem-bar" style="width: 0%;"></div>
+                        </div>
+                        <div class="metric-subtext" id="mem-text">0 / 0 GB</div>
+                    </div>
+
+                    <div class="metric-item">
+                        <div class="metric-header">
+                            <h3>Disk Usage</h3>
+                            <span class="metric-value" id="disk-val">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill disk-fill" id="disk-bar" style="width: 0%;"></div>
+                        </div>
+                        <div class="metric-subtext" id="disk-text">0 / 0 GB</div>
+                    </div>
+
+                    <div class="metric-item network-item">
+                        <div class="metric-header">
+                            <h3>Network I/O</h3>
+                        </div>
+                        <div class="network-stats">
+                            <div class="net-stat">
+                                <span class="net-icon up">↑</span>
+                                <span class="net-val" id="net-sent">0 MB</span>
+                            </div>
+                            <div class="net-stat">
+                                <span class="net-icon down">↓</span>
+                                <span class="net-val" id="net-recv">0 MB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Alerts System -->
+            <section class="card alerts-card">
+                <div class="card-header">
+                    <h2>Active Alerts</h2>
+                    <span class="badge" id="alerts-count">0</span>
+                </div>
+                <div class="alerts-list" id="alerts-container">
+                    <div class="empty-state">No active alerts</div>
+                </div>
+            </section>
+
+            <!-- Security Events -->
+            <section class="card security-card">
+                <h2>Security Log</h2>
+                <div class="security-list" id="security-container">
+                    <div class="empty-state">No recent security events</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  dashboard:
+    build: .
+    container_name: linuxdash
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST_PROC=/host/proc
+      - HOST_ROOT=/host/root
+      - AUTH_LOG_PATH=/host/var/log/auth.log
+    volumes:
+      - /proc:/host/proc:ro
+      - /:/host/root:ro
+      - /var/log:/host/var/log:ro
+    # pid: host allows psutil to see host processes correctly if needed, though mostly /proc mount is enough
+    pid: host
