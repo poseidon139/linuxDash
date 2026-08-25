@@ -1,0 +1,47 @@
+/workspace/backend/app.py:92: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Will watch for changes in these directories: ['/workspace/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [862] using StatReload
+INFO:     Started server process [869]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+Warning: Log file /var/log/auth.log not found.
+INFO:     127.0.0.1:56020 - "GET /static/index.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56022 - "GET / HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:56024 - "HEAD / HTTP/1.1" 405 Method Not Allowed
+INFO:     127.0.0.1:56026 - "GET / HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:56026 - "GET /static/index.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56028 - "GET /static/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56030 - "GET /static/app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56032 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56034 - "GET /openapi.json HTTP/1.1" 200 OK
+WARNING:  StatReload detected changes in 'system_monitor.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [869]
+INFO:     Started server process [2552]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in 'system_monitor.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [2552]
+INFO:     Started server process [2586]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in 'alert_system.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [2586]
+INFO:     Started server process [2667]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

@@ -40,14 +40,24 @@ def check_thresholds(metrics: dict) -> List[Dict[str, Any]]:
     """
     alerts = []
     
-    if metrics["cpu"]["percent"] > config.cpu_threshold:
-        alerts.append(_create_alert("cpu", metrics["cpu"]["percent"], config.cpu_threshold))
+    cpu_percent = metrics["cpu"]["total"]
+    if cpu_percent > config.cpu_threshold:
+        alerts.append(_create_alert("cpu", cpu_percent, config.cpu_threshold))
     
-    if metrics["memory"]["percent"] > config.memory_threshold:
-        alerts.append(_create_alert("memory", metrics["memory"]["percent"], config.memory_threshold))
+    memory_percent = metrics["memory"]["percent"]
+    if memory_percent > config.memory_threshold:
+        alerts.append(_create_alert("memory", memory_percent, config.memory_threshold))
     
-    if metrics["disk"]["percent"] > config.disk_threshold:
-        alerts.append(_create_alert("disk", metrics["disk"]["percent"], config.disk_threshold, level="warning"))
+    # Check disk partitions for threshold violations
+    if "disk" in metrics and "partitions" in metrics["disk"]:
+        for partition in metrics["disk"]["partitions"]:
+            if partition.get("percent", 0) > config.disk_threshold:
+                alerts.append(_create_alert(
+                    f"disk ({partition['mountpoint']})", 
+                    partition["percent"], 
+                    config.disk_threshold, 
+                    level="warning"
+                ))
     
     return alerts
 
