@@ -1,1 +1,5 @@
-Nothing needs to be added to .gitignore since the changes only include Python source files (.py) which are source code and should not be ignored.
+```
+# Logs and temp files
+*.log
+server.log
+```
