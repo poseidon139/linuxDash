@@ -36,6 +36,7 @@ function connectWebSocket() {
     ws.onmessage = (event) => {
         try {
             const msg = JSON.parse(event.data);
+            console.log('Received:', msg.type, msg.data ? 'with data' : 'no data');
             if (msg.type === 'metrics') {
                 updateMetrics(msg.data);
             } else if (msg.type === 'alert') {
