@@ -1,8 +1,11 @@
 const UI = {
-    cpu: { val: document.getElementById('cpu-val'), bar: document.getElementById('cpu-bar') },
-    mem: { val: document.getElementById('mem-val'), bar: document.getElementById('mem-bar'), text: document.getElementById('mem-text') },
-    disk: { val: document.getElementById('disk-val'), bar: document.getElementById('disk-bar'), text: document.getElementById('disk-text') },
-    net: { sent: document.getElementById('net-sent'), recv: document.getElementById('net-recv') },
+    cpu: { val: document.getElementById('cpu-val'), bar: document.getElementById('cpu-bar'), cores: document.getElementById('cpu-cores') },
+    mem: { val: document.getElementById('mem-val'), bar: document.getElementById('mem-bar'), text: document.getElementById('mem-text'), swap: document.getElementById('swap-info') },
+    disk: { val: document.getElementById('disk-val'), bar: document.getElementById('disk-bar'), text: document.getElementById('disk-text'), io: document.getElementById('disk-io'), partitions: document.getElementById('disk-partitions') },
+    net: { sent: document.getElementById('net-sent'), recv: document.getElementById('net-recv'), interfaces: document.getElementById('net-interfaces') },
+    load: { avg: document.getElementById('load-avg') },
+    freq: { mhz: document.getElementById('cpu-freq') },
+    processes: { list: document.getElementById('top-processes') },
     status: { dot: document.querySelector('.status-dot'), text: document.getElementById('connection-status') },
     alerts: { container: document.getElementById('alerts-container'), count: document.getElementById('alerts-count') },
     security: { container: document.getElementById('security-container') }
@@ -33,6 +36,7 @@ function connectWebSocket() {
     ws.onmessage = (event) => {
         try {
             const msg = JSON.parse(event.data);
+            console.log('Received:', msg.type, msg.data ? 'with data' : 'no data');
             if (msg.type === 'metrics') {
                 updateMetrics(msg.data);
             } else if (msg.type === 'alert') {
@@ -52,27 +56,132 @@ function getColorForPercent(percent) {
     return 'var(--critical)';
 }
 
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 function updateMetrics(data) {
+    // Load Average & CPU Frequency
+    if (data.cpu.load_avg) {
+        UI.load.avg.textContent = data.cpu.load_avg['1m'];
+    }
+    if (data.cpu.frequency_mhz) {
+        UI.freq.mhz.textContent = data.cpu.frequency_mhz;
+    }
+
     // CPU
-    UI.cpu.val.textContent = `${data.cpu.percent}%`;
-    UI.cpu.bar.style.width = `${data.cpu.percent}%`;
-    UI.cpu.bar.style.backgroundColor = getColorForPercent(data.cpu.percent);
+    UI.cpu.val.textContent = `${data.cpu.total}%`;
+    UI.cpu.bar.style.width = `${data.cpu.total}%`;
+    UI.cpu.bar.style.backgroundColor = getColorForPercent(data.cpu.total);
+    
+    if (data.cpu.per_core && data.cpu.per_core.length > 0) {
+        UI.cpu.cores.textContent = `${data.cpu.core_count || data.cpu.per_core.length} cores | Avg: ${Math.round(data.cpu.total)}%`;
+    }
 
     // Memory
     UI.mem.val.textContent = `${data.memory.percent}%`;
     UI.mem.bar.style.width = `${data.memory.percent}%`;
     UI.mem.bar.style.backgroundColor = getColorForPercent(data.memory.percent);
-    UI.mem.text.textContent = `${data.memory.used_gb} / ${data.memory.total_gb} GB`;
+    
+    const memUsedGB = (data.memory.used / 1024 / 1024 / 1024).toFixed(2);
+    const memTotalGB = (data.memory.total / 1024 / 1024 / 1024).toFixed(2);
+    UI.mem.text.textContent = `${memUsedGB} / ${memTotalGB} GB`;
+    
+    if (data.memory.swap_total > 0) {
+        const swapPercent = data.memory.swap_percent || 0;
+        const swapUsedGB = (data.memory.swap_used / 1024 / 1024 / 1024).toFixed(2);
+        const swapTotalGB = (data.memory.swap_total / 1024 / 1024 / 1024).toFixed(2);
+        UI.mem.swap.textContent = `Swap: ${swapPercent}% (${swapUsedGB}/${swapTotalGB} GB)`;
+    }
 
-    // Disk
-    UI.disk.val.textContent = `${data.disk.percent}%`;
-    UI.disk.bar.style.width = `${data.disk.percent}%`;
-    UI.disk.bar.style.backgroundColor = getColorForPercent(data.disk.percent);
-    UI.disk.text.textContent = `${data.disk.used_gb} / ${data.disk.total_gb} GB`;
+    // Disk - Use first partition for main display
+    if (data.disk.partitions && data.disk.partitions.length > 0) {
+        const rootPartition = data.disk.partitions.find(p => p.mountpoint === '/') || data.disk.partitions[0];
+        UI.disk.val.textContent = `${rootPartition.percent}%`;
+        UI.disk.bar.style.width = `${rootPartition.percent}%`;
+        UI.disk.bar.style.backgroundColor = getColorForPercent(rootPartition.percent);
+        
+        const usedGB = (rootPartition.used / 1024 / 1024 / 1024).toFixed(2);
+        const totalGB = (rootPartition.total / 1024 / 1024 / 1024).toFixed(2);
+        UI.disk.text.textContent = `${usedGB} / ${totalGB} GB (${rootPartition.mountpoint})`;
+        
+        // Disk I/O
+        if (data.disk.io_stats && data.disk.io_stats.read_mb_s !== undefined) {
+            UI.disk.io.textContent = `I/O: ↑${data.disk.io_stats.write_mb_s} MB/s ↓${data.disk.io_stats.read_mb_s} MB/s`;
+        }
+        
+        // Update partitions list
+        updatePartitions(data.disk.partitions);
+    }
 
     // Network
-    UI.net.sent.textContent = `${data.network.sent_mb} MB`;
-    UI.net.recv.textContent = `${data.network.recv_mb} MB`;
+    if (data.network.bandwidth) {
+        UI.net.sent.textContent = `${data.network.bandwidth.sent_mb_s} MB/s`;
+        UI.net.recv.textContent = `${data.network.bandwidth.recv_mb_s} MB/s`;
+    }
+    
+    // Update interfaces list
+    if (data.network.interfaces) {
+        updateInterfaces(data.network.interfaces);
+    }
+
+    // Top Processes
+    if (data.memory.top_processes) {
+        updateProcesses(data.memory.top_processes);
+    }
+}
+
+function updateProcesses(processes) {
+    if (!processes || processes.length === 0) {
+        UI.processes.list.innerHTML = '<div class="empty-state">No process data available</div>';
+        return;
+    }
+    
+    UI.processes.list.innerHTML = processes.map(proc => `
+        <div class="process-item">
+            <span class="process-name">${proc.name} (PID: ${proc.pid})</span>
+            <span class="process-mem">${proc.memory_mb} MB (${proc.percent}%)</span>
+        </div>
+    `).join('');
+}
+
+function updatePartitions(partitions) {
+    if (!partitions || partitions.length === 0) {
+        UI.disk.partitions.innerHTML = '<div class="empty-state">No partitions found</div>';
+        return;
+    }
+    
+    UI.disk.partitions.innerHTML = partitions.map(part => {
+        const usedGB = (part.used / 1024 / 1024 / 1024).toFixed(2);
+        const totalGB = (part.total / 1024 / 1024 / 1024).toFixed(2);
+        const barColor = part.percent > 90 ? 'var(--critical)' : part.percent > 70 ? 'var(--warning)' : 'var(--success)';
+        
+        return `
+            <div class="partition-item">
+                <span class="partition-name">${part.device} → ${part.mountpoint}</span>
+                <span class="partition-usage">${part.percent}%</span>
+                <div class="partition-bar">
+                    <div class="partition-fill" style="width: ${part.percent}%; background: ${barColor}"></div>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-secondary); margin-left: 0.5rem;">${usedGB}/${totalGB} GB</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateInterfaces(interfaces) {
+    const activeIfaces = interfaces.filter(iface => iface.is_up);
+    if (activeIfaces.length === 0) {
+        UI.net.interfaces.textContent = 'No active interfaces';
+        return;
+    }
+    
+    const ifaceNames = activeIfaces.map(i => `${i.name} (${i.speed >= 1000 ? (i.speed/1000).toFixed(0) + 'G' : i.speed + 'M'})`).join(', ');
+    UI.net.interfaces.textContent = `Active: ${ifaceNames}`;
 }
 
 function createListItem(time, message, levelClass = '') {
