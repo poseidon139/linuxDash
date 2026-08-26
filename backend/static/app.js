@@ -79,7 +79,7 @@ function updateMetrics(data) {
     UI.cpu.bar.style.backgroundColor = getColorForPercent(data.cpu.total);
     
     if (data.cpu.per_core && data.cpu.per_core.length > 0) {
-        UI.cores.textContent = `${data.cpu.core_count || data.cpu.per_core.length} cores | Avg: ${Math.round(data.cpu.total)}%`;
+        UI.cpu.cores.textContent = `${data.cpu.core_count || data.cpu.per_core.length} cores | Avg: ${Math.round(data.cpu.total)}%`;
     }
 
     // Memory
