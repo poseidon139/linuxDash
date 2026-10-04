@@ -29,8 +29,14 @@
 
         <main class="dashboard-grid">
             <!-- System Metrics -->
-            <section class="card metrics-card">
-                <h2>System Resources</h2>
+            <section class="card metrics-card full-width">
+                <div class="card-header">
+                    <h2>System Resources</h2>
+                    <div class="header-stats">
+                        <span class="stat-badge">Load: <strong id="load-avg">0.00</strong></span>
+                        <span class="stat-badge">CPU Freq: <strong id="cpu-freq">0</strong> MHz</span>
+                    </div>
+                </div>
                 <div class="metrics-grid">
                     
                     <div class="metric-item">
@@ -41,6 +47,7 @@
                         <div class="progress-bar">
                             <div class="progress-fill" id="cpu-bar" style="width: 0%;"></div>
                         </div>
+                        <div class="metric-detail" id="cpu-cores"></div>
                     </div>
 
                     <div class="metric-item">
@@ -52,6 +59,7 @@
                             <div class="progress-fill mem-fill" id="mem-bar" style="width: 0%;"></div>
                         </div>
                         <div class="metric-subtext" id="mem-text">0 / 0 GB</div>
+                        <div class="metric-detail" id="swap-info"></div>
                     </div>
 
                     <div class="metric-item">
@@ -63,6 +71,7 @@
                             <div class="progress-fill disk-fill" id="disk-bar" style="width: 0%;"></div>
                         </div>
                         <div class="metric-subtext" id="disk-text">0 / 0 GB</div>
+                        <div class="metric-detail" id="disk-io"></div>
                     </div>
 
                     <div class="metric-item network-item">
@@ -72,15 +81,33 @@
                         <div class="network-stats">
                             <div class="net-stat">
                                 <span class="net-icon up">↑</span>
-                                <span class="net-val" id="net-sent">0 MB</span>
+                                <span class="net-val" id="net-sent">0 MB/s</span>
                             </div>
                             <div class="net-stat">
                                 <span class="net-icon down">↓</span>
-                                <span class="net-val" id="net-recv">0 MB</span>
+                                <span class="net-val" id="net-recv">0 MB/s</span>
                             </div>
                         </div>
+                        <div class="metric-detail" id="net-interfaces"></div>
                     </div>
 
+                </div>
+                
+                <!-- New Granular Sections -->
+                <div class="granular-sections">
+                    <div class="sub-metrics">
+                        <h3>Top Memory Processes</h3>
+                        <div class="process-list" id="top-processes">
+                            <div class="empty-state">Loading...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="sub-metrics">
+                        <h3>Disk Partitions</h3>
+                        <div class="partition-list" id="disk-partitions">
+                            <div class="empty-state">Loading...</div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
